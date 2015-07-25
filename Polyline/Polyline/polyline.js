@@ -162,7 +162,7 @@ function display() {
 	// alert(message);
 	// gl.lineWidth(currLineWidth);  
 	gl.lineWidth(currLineWidth);
-	gl.drawArrays(gl.LINESTRIP, 0, points.length);
+	gl.drawArrays(gl.LINE_STRIP, 0, points.length);
 	// if (points.length > 10)
 		// alert("over 10 points");
 }
