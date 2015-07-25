@@ -22,11 +22,6 @@
    Line width can be set using gl.lineWidth ...
    In the html page we'll have a slider for setting line width in pixels
    between 1 (default) and 10 .. 
-
-   
-
-
-
 */
    
 "use strict" 
