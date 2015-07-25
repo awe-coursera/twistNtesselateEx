@@ -1,5 +1,0 @@
-// add a vertex to GPU for each click
-
-canvas.addEventListener("click", function () {
-	gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
-
