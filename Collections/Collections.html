@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+    <html lang="en"><head>
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+        <meta charset="utf-8">
+    <script id="vertex-shader" type="x-shader/x-vertex">
+	uniform mat4 u_modelMatrix;
+	uniform mat4 u_modelViewMatrix;
+	uniform mat4 u_viewMatrix;
+	uniform mat4 u_projectionMatrix;
+	attribute vec3 vPosition;
+	attribute vec3 vColor;
+	varying vec4 vrtxColor;
+
+		void
+		main()
+		{
+    			// gl_Position = vec4(vPosition, 1);
+                        // gl_Position = u_modelViewMatrix * vec4(vPosition,1);
+			gl_Position = u_projectionMatrix * u_modelViewMatrix * vec4(vPosition,1);	
+			// gl_Position = u_projectionMatrix * vec4(vPosition,1);
+			// gl_Position = u_modelMatrix * vec4(vPosition, 1);	
+			vrtxColor = vec4(vColor, 1);
+		}
+	</script>
+
+	<script id="fragment-shader" type="x-shader/x-fragment">
+	precision mediump float;
+	varying vec4 vrtxColor;
+        void main() {
+            gl_FragColor = vrtxColor;
+        }
+	</script>
+
+    <script type="text/javascript">
+     function get_nextsibling(n) {
+     	var x;
+     	x=n.nextSibling;
+     	while (x.nodeType!=1) {
+       		x=x.nextSibling;
+       	}
+     	return x;
+     }
+
+    function showValue(self) {
+     	get_nextsibling(self).innerHTML=self.value;
+    }
+    </script>
+
+    <script type="text/javascript" src="../Common/webgl-utils.js"></script>
+    <script type="text/javascript" src="../Common/initShaders.js"></script>
+    <script type="text/javascript" src="../Common/webgl-utils.js"></script>
+    <script type="text/javascript" src="../Common/webgl-debug.js"></script>
+    <script type="text/javascript" src="../Common/cuon-utils.js"></script>
+    <script type="text/javascript" src="../Common/initShaders.js"></script>
+    <script type="text/javascript" src="../Common/MV.js"></script>
+    <script type="text/javascript" src="../Common/cuon-matrix.js"></script>
+    <script type="text/javascript" src="../ProtoSphere/ProtoSphere.js"></script>
+    <script type="text/javascript" src="../ProtoCone/ProtoCone.js"></script>
+    <script type="text/javascript" src="../ProtoCylinder/ProtoCylinder.js"></script>    
+
+    <script type="text/javascript" src="Collections.js"></script>
+</head>
+<body>
+<br> This application is a prototype for experimenting with creating and position shapes
+<br> on a WebGL canvas ... using raw WebGL as opposed to more complex libraries such as
+<br> Three.js
+<br> The canvas is display an initial collection of objects which demonstrate the possibilities
+<br> You can add objects to this collection.
+<br> To add a new object use the list box and the various sliders provided to select the object type and its properties
+<br> Then click on the "Create a new object" button to create the object you have specified. 
+<br> At the moment there are no edit facilities for e.g. deleting and duplicating objects
+<br> Neither are there and facilities for selecting objects interactively, and adjusting the camera
+<br> and projection settings. 
+<br>
+<br>
+Adjust the shape properties using the sliders provided
+<br> Then click the Create Shape button to create a shape with those properties.
+<div>
+Select a Shape :
+<select size="1" id="shapeSelect" value="1" name="shapeTypeSelector" onchange="">
+<option value="1">Cone</option>
+<option value="2">Cylinder</option>
+<option value="3">Sphere</option>
+</select>
+</div>
+<div>
+X Position - Range from -3 to +3<input id="xPosSlider" type="range" min="-3" max="3" value="0" step="0.1" onchange = "showValue(this)"/>
+    <span id="range">0</span>
+</div>
+
+<div>
+Y Position - Range from -3 to +3<input id="yPosSlider" type="range" min="-3" max="+3" value="0" step="0.1" onchange = "showValue(this)"/>
+    <span id="range">0</span>
+</div>
+
+<div>
+Z Position - Range from -3 to +3<input id="zPosSlider" type="range" min="-3" max="3" value="0" step="0.1" onchange = "showValue(this)"/>
+    <span id="range">0</span>
+
+</div>
+
+<div>
+X Scale Range from 0.1 to 0.5<input id="xScaleSlider" type="range" min="0.1" max="0.5" value="0.1" step="0.1" onchange = "showValue(this)"/>
+    <span id="range">0</span>
+</div>
+
+<div>
+Y Scale Range from 0.1 to 0.5<input id="yScaleSlider" type="range" min="0.1" max="0.5" value="0.1" step="0.1" onchange = "showValue(this)"/>
+    <span id="range">0</span>
+</div>
+
+<div>
+Z Scale Range from 0.1 to 0.5<input id="zScaleSlider" type="range" min="0.1" max="0.5" value="0.1" step="0.1" onchange = "showValue(this)"/>
+
+    <span id="range">0</span></div>
+
+<div>
+Rotate About X axis - Range from -30 to +30 degrees<input id="xRotSlider" type="range" min="-30" max="+30" value="0" step="5" onchange = "showValue(this)"/>
+    <span id="range">0</span>
+</div>
+
+<div>
+Rotate About Y axis - Range from -30 to +30 degrees<input id="yRotSlider" type="range" min="-30" max="+30" value="0" step="5" onchange = "showValue(this)"/>
+    <span id="range">0</span>
+</div>
+
+<div>
+Rotate About Z axis - Range from -30 to +30 degrees<input id="zRotSlider" type="range" min="-30" max="+30" value="0" step="5"  onchange = "showValue(this)"/>
+    <span id="range">0</span>
+</div>
+
+<div>
+	<input id="AddShapeButton" type="button" value="Add Item" onclick="createNewObjectAndUpdateDisplay()">
+
+</div>
+<br>
+<br>
+
+<canvas id="gl-canvas" width="512" height="512">
+    Oops ... your browser doesn't support the HTML5 canvas element
+</canvas>
+</body>
+</html>
