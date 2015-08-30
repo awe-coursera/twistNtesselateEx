@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+    <html lang="en"><head>
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+        <meta charset="utf-8">
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+
+attribute vec4 vPosition;
+attribute vec4 vNormal;
+varying vec3 N, L1,L2, L3, E;
+uniform mat4 u_modelMatrix;
+uniform mat4 u_modelViewMatrix;
+uniform mat4 u_projectionMatrix;
+
+
+uniform vec4 u_light1Position;
+uniform vec4 u_light2Position;
+uniform vec4 u_light3Position;
+uniform mat4 u_normalMatrix;
+
+
+
+void main()
+{
+
+
+    vec4 transformedNormal = u_normalMatrix * vec4(vNormal);
+
+
+    vec3 light;
+    vec3 pos = (u_modelViewMatrix * vPosition).xyz;
+
+    if(u_light1Position.z == 0.0)  L1 = normalize(u_light1Position.xyz);
+    else  L1 = normalize(u_light1Position).xyz - pos;
+
+    if(u_light2Position.z == 0.0)  L2 = normalize(u_light2Position.xyz);
+    else  L2 = normalize(u_light2Position).xyz - pos;
+
+    if(u_light3Position.z == 0.0)  L3 = normalize(u_light3Position.xyz);
+    else  L3 = normalize(u_light3Position).xyz - pos;
+
+    E =  -normalize(pos);
+    N = normalize( transformedNormal.xyz);
+    gl_Position = u_projectionMatrix * u_modelViewMatrix * vPosition;
+    
+}
+</script>
+
+
+
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+
+precision mediump float;
+
+uniform vec4 u_materialAmbient;
+uniform vec4 u_materialDiffuse;
+uniform vec4 u_materialsSpecular;
+uniform float u_shininess;
+
+uniform vec4 u_light1Ambient;
+uniform vec4 u_light1Diffuse;
+uniform vec4 u_light1Specular;
+
+
+uniform vec4 u_light2Ambient;
+uniform vec4 u_light2Diffuse;
+uniform vec4 u_light2Specular;
+
+
+uniform vec4 u_light3Ambient;
+uniform vec4 u_light3Diffuse;
+uniform vec4 u_light3Specular;
+
+uniform vec3 u_light1Mix;
+uniform vec3 u_light2Mix;
+uniform vec3 u_light3Mix;
+
+
+
+uniform vec4 ambientProduct;
+uniform vec4 diffuseProduct;
+uniform vec4 specularProduct;
+
+uniform float shininess;
+varying vec3 N, L1 , L2, L3, E;
+
+void main()
+{  
+	vec4 ambient1Product;
+	vec4 ambient2Product;
+	vec4 ambient3Product;	
+
+	if (u_light1Mix[0]  > 0.0) {
+		ambient1Product = u_materialAmbient * u_light1Ambient;
+	} else {
+		ambient1Product = vec4(0,0,0,1);
+	}
+ 
+ 	if (u_light2Mix[0]  > 0.0) {
+		ambient2Product = u_materialAmbient * u_light2Ambient;
+	} else {
+		ambient2Product = vec4(0,0,0,1);
+	}   
+
+ 	if (u_light3Mix[0] > 0.0) {
+		ambient3Product = u_materialAmbient * u_light3Ambient;
+	} else {
+		ambient3Product = vec4(0,0,0,1);
+	}  
+
+	vec4 diffuse1Product;
+	vec4 diffuse2Product;
+	vec4 diffuse3Product;	
+
+	if (u_light1Mix[1]  > 0.0) {
+		diffuse1Product = u_materialDiffuse * u_light1Diffuse;
+	} else {
+		diffuse1Product = vec4(0,0,0,1);
+	}
+ 
+ 	if (u_light2Mix[1]  > 0.0) {
+		diffuse2Product = u_materialAmbient * u_light2Diffuse;
+	} else {
+		diffuse2Product = vec4(0,0,0,1);
+	}   
+
+ 	if (u_light3Mix[1]  > 0.0) {
+		diffuse3Product = u_materialAmbient * u_light3Diffuse;
+	} else {
+		diffuse3Product = vec4(0,0,0,1);
+	}  
+
+
+	vec4 specular1Product;
+	vec4 specular2Product;
+	vec4 specular3Product;	
+
+	if (u_light1Mix[2]  > 0.0) {
+		specular1Product = u_materialDiffuse * u_light1Specular;
+	} else {
+		specular1Product = vec4(0,0,0,1);
+	}
+ 
+ 	if (u_light2Mix[2]  > 0.0) {
+		specular2Product = u_materialAmbient * u_light2Specular;
+	} else {
+		specular2Product = vec4(0,0,0,1);
+	}   
+
+ 	if (u_light3Mix[2] > 0.0) {
+		specular3Product = u_materialAmbient * u_light3Specular;
+	} else {
+		specular3Product = vec4(0,0,0,1);
+	}  
+
+
+    	vec4 fColor;
+    
+    vec3 H1 = normalize( L1 + E );
+    vec3 H2 = normalize( L2 + E );
+    vec3 H3 = normalize( L3 + E );
+
+    vec4 ambient1 = ambient1Product;
+    vec4 ambient2 = ambient2Product;
+    vec4 ambient3 = ambient3Product;
+
+    float Kd1 = max( dot(L1, N), 0.0 );
+    float Kd2 = max( dot(L2, N), 0.0 );
+    float Kd3 = max( dot(L3, N), 0.0 );
+
+
+    vec4  diffuse1 = Kd1*diffuse1Product;
+    vec4  diffuse2 = Kd2*diffuse2Product;
+    vec4  diffuse3 = Kd3*diffuse3Product;
+
+    float Ks1 = pow( max(dot(N, H1), 0.0), shininess );
+    float Ks2 = pow( max(dot(N, H1), 0.0), shininess );  
+    float Ks3 = pow( max(dot(N, H1), 0.0), shininess );
+
+    vec4  specular1 = Ks1 * specular1Product;
+    vec4  specular2 = Ks2 * specular2Product;
+    vec4  specular3 = Ks3 * specular3Product;
+    
+    if( dot(L1, N) < 0.0 ) {
+	specular1 = vec4(0.0, 0.0, 0.0, 1.0);
+    }
+
+    if( dot(L2, N) < 0.0 ) {
+	specular2 = vec4(0.0, 0.0, 0.0, 1.0);
+    }
+
+    if( dot(L3, N) < 0.0 ) {
+	specular3 = vec4(0.0, 0.0, 0.0, 1.0);
+    }
+
+
+
+    fColor = ambient1 + diffuse1 +specular1 +
+	ambient2 + diffuse2 + specular2 +
+	ambient3 + diffuse3 + specular3;
+    fColor.a = 1.0;
+
+    gl_FragColor = fColor;
+}
+</script>
+
+
+    <script type="text/javascript">
+     function get_nextsibling(n) {
+     	var x;
+     	x=n.nextSibling;
+     	while (x.nodeType!=1) {
+       		x=x.nextSibling;
+       	}
+     	return x;
+     }
+
+    function showValue(self) {
+     	get_nextsibling(self).innerHTML=self.value;
+    }
+    </script>
+    <script type="text/javascript" src="../Common/initShaders.js"></script>
+    <script type="text/javascript" src="../Common/webgl-utils.js"></script>
+    <script type="text/javascript" src="../Common/webgl-debug.js"></script>
+    <script type="text/javascript" src="../Common/cuon-utils.js"></script>
+    <script type="text/javascript" src="../Common/initShaders.js"></script>
+    <script type="text/javascript" src="../Common/MV.js"></script>
+    <script type="text/javascript" src="../Common/cuon-matrix.js"></script>
+    <script type="text/javascript" src="../ProtoSphereAndNormals/ProtoSphere.js"></script>
+    <script type="text/javascript" src="../ProtoConeAndNormals/ProtoCone.js"></script>
+    <script type="text/javascript" src="../ProtoCylinderAndNormals/ProtoCylinder.js"></script>    
+
+    <script type="text/javascript" src="./Collections.js"></script>
+</head>
+<body>
+<br> This application creates several 3D objects and
+<br> also creates 3 lights
+<br> an ambient light, a diffuse light and a specular light
+<br> It needs to be extended to add animation of the lights ... 
+<br> and to add extra interactivity .. 
+
+
+<br>
+<br>
+
+<canvas id="gl-canvas" width="512" height="512">
+    Oops ... your browser doesn't support the HTML5 canvas element
+</canvas>
+</body>
+</html>
